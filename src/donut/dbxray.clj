@@ -22,14 +22,18 @@
                                            (filter (complement :non_unique))
                                            seq))
                     :autoincrement? (fn [{:keys [is_autoincrement] :as _raw}]
-                                      (= "YES" is_autoincrement))}})
+                                      (= "YES" is_autoincrement))
+                    :unsigned?      (fn [_] 
+                                      nil)}})
 
 (defmulti adapter* :dbtype)
 
 (defmethod adapter* :postgresql
   [_]
   {:schema-pattern "public"
-   :column-types   {#"serial" :integer}})
+   :column-types   {#"serial" :integer}
+   :predicates     {:unsigned? (fn [{:keys [type_name] :as _raw}]
+                                 (= "uint" type_name))}})
 
 (defmethod adapter* :sqlite
   [_]
@@ -142,16 +146,18 @@
                     nullable?      ((:nullable? predicates) raw-column)
                     unique?        ((:unique? predicates) raw-column)
                     autoincrement? ((:autoincrement? predicates) raw-column)
+                    unsigned?      ((:unsigned? predicates) raw-column)
                     primary-key?   (get pks column_name)]
                 (assoc cols-map
                        (keyword column_name)
                        (cond-> {:column-type (adapt-column-type (-> type_name str/lower-case) column-types)}
-                         include-raw?   (assoc :raw raw-column)
-                         nullable?      (assoc :nullable? true)
-                         primary-key?   (assoc :primary-key? true)
-                         unique?        (assoc :unique? true)
-                         autoincrement? (assoc :autoincrement? true)
-                         fk-ref         (assoc :refers-to fk-ref)))))
+                         include-raw?      (assoc :raw raw-column)
+                         nullable?         (assoc :nullable? true)
+                         primary-key?      (assoc :primary-key? true)
+                         unique?           (assoc :unique? true)
+                         autoincrement?    (assoc :autoincrement? true)
+                         (some? unsigned?) (assoc :unsigned? unsigned?)
+                         fk-ref            (assoc :refers-to fk-ref)))))
             {}
             table-cols)))
 

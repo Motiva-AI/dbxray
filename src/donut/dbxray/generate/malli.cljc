@@ -6,6 +6,7 @@
 
 (def column-types
   {:integer    'int?
+   :uint       'pos-int?
    :integer-pk 'pos-int?
    :clob       'string?
    :text       'string?
@@ -28,7 +29,7 @@
    (column-spec nil xray table-name column-name))
 
   ([enums xray table-name column-name]
-   (let [{:keys [column-type primary-key? nullable? refers-to]} (get-in xray [table-name :columns column-name])]
+   (let [{:keys [column-type primary-key? nullable? unsigned? refers-to]} (get-in xray [table-name :columns column-name])]
      [(column-spec-name table-name column-name)
       {:optional? (boolean nullable?)}
 
@@ -38,6 +39,9 @@
 
         (and (= :integer column-type) primary-key?)
         (:integer-pk column-types)
+
+        (and (= :integer column-type) unsigned?)
+        (:uint column-types)
 
         ;; :enum type definition 
         (str/includes? column-type ".")
