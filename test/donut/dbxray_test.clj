@@ -132,12 +132,14 @@
                                           :timestamp_ex {:raw {:type_name   "timestamp"
                                                                :column_name "timestamp_ex"
                                                                :is_nullable "YES"}}}}
-               :child_records  {:columns {:id    {:raw {:type_name   "int4"
-                                                        :column_name "id"
-                                                        :is_nullable "NO"}}
-                                          :fk_id {:raw {:type_name   "int4"
-                                                        :column_name "fk_id"
-                                                        :is_nullable "NO"}}}}}}))
+               :child_records  {:columns {:id    {:raw       {:type_name   "int4"
+                                                              :column_name "id"
+                                                              :is_nullable "NO"}
+                                                  :unsigned? false}
+                                          :fk_id {:raw      {:type_name   "int4"
+                                                             :column_name "fk_id"
+                                                             :is_nullable "NO"}
+                                                  :unsigned? false}}}}}))
   (testing "without raw data"
     (assert-vendor-data-matches postgres-config {} {})))
 
